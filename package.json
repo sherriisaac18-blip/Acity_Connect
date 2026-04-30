@@ -1,0 +1,12 @@
+{
+  "name": "acity-connect",
+  "version": "1.0.0",
+  "description": "Academic City campus marketplace and skill exchange platform",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -3,10 +3,12 @@
 ## Project Overview
 Acity Connect is a smart campus marketplace and skill exchange platform for Academic City students. Students can register with an institutional email, create a profile, post second-hand items, offer or request skills, express interest in listings, and track trade requests. Admin users can approve, edit, flag, and delete listings while viewing platform activity.
 
-## Deployment Links
-Frontend (GitHub Pages): https://sherriisaac18-blip.github.io/Acity_Connect/
+The app now uses a Node.js backend API instead of browser localStorage. The backend serves the frontend pages and stores users, listings, and requests in `data.json` on the server.
 
-Backend (Render): Not applicable for this version. The project uses browser localStorage to simulate user accounts, listings, requests, and admin moderation.
+## Deployment Links
+Frontend and Backend on Render: Add your Render Web Service link here after deployment.
+
+GitHub Repository: Add your public GitHub repository link here.
 
 ## Login Details
 Admin Account: admin@acity.edu.gh | Password: admin123
@@ -16,8 +18,9 @@ Student Account: student@acity.edu.gh | Password: password123
 New users must register with an Academic City email domain such as `@acity.edu.gh`, `@acity.edu`, or `@acity.ac.gh`.
 
 ## Feature Checklist
-- [x] Secure-style registration and login flow
+- [x] Registration and login system
 - [x] Registration restricted to institutional ACity email domains
+- [x] Passwords stored as server-side hashes
 - [x] User profile page with personal information
 - [x] Skills Offered and Skills Needed fields
 - [x] Profile update functionality
@@ -31,6 +34,7 @@ New users must register with an Academic City email domain such as `@acity.edu.g
 - [x] Admin listing approval
 - [x] Admin listing edit, flag, and delete actions
 - [x] Platform activity statistics
+- [x] Render-ready backend using Node.js
 
 ## Installation Instructions
 1. Clone the repository:
@@ -43,6 +47,24 @@ git clone https://github.com/sherriisaac18-blip/Acity_Connect.git
 cd Acity_Connect
 ```
 
-3. Open `index.html` in a browser.
+3. Start the server:
+```bash
+npm start
+```
 
-No package installation is required because this project is built with HTML, CSS, and JavaScript only.
+4. Open the app:
+```text
+http://localhost:3000
+```
+
+No npm packages are required because the backend uses Node.js built-in modules.
+
+## Render Deployment Instructions
+Create a new Render Web Service and use these settings:
+
+- Environment: Node
+- Build Command: `npm install`
+- Start Command: `npm start`
+- Root Directory: leave blank if the files are in the repository root
+
+After deployment, use the Render Web Service URL as both the frontend and backend deployment link because the Node server serves the HTML pages and API routes together.

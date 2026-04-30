@@ -1,5 +1,5 @@
-document.addEventListener("DOMContentLoaded", () => {
-    seedDemoData();
+document.addEventListener("DOMContentLoaded", async () => {
+    await loadCurrentUser();
     updateNavigation();
     setupRegistration();
     setupLogin();
@@ -10,105 +10,44 @@ document.addEventListener("DOMContentLoaded", () => {
     setupAdmin();
 });
 
-const ACITY_DOMAINS = ["@acity.edu", "@acity.edu.gh", "@acity.ac.gh"];
+let loggedInUser = null;
 
-function getData(key, fallback) {
-    return JSON.parse(localStorage.getItem(key)) || fallback;
+async function apiRequest(path, options = {}) {
+    const response = await fetch(path, {
+        credentials: "include",
+        headers: {
+            "Content-Type": "application/json",
+            ...(options.headers || {})
+        },
+        ...options
+    });
+
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+        throw new Error(data.message || "Something went wrong.");
+    }
+
+    return data;
 }
 
-function setData(key, value) {
-    localStorage.setItem(key, JSON.stringify(value));
+async function loadCurrentUser() {
+    try {
+        const data = await apiRequest("/api/me");
+        loggedInUser = data.user;
+    } catch {
+        loggedInUser = null;
+    }
 }
 
 function currentUser() {
-    return JSON.parse(localStorage.getItem("currentUser"));
-}
-
-function isInstitutionalEmail(email) {
-    return ACITY_DOMAINS.some(domain => email.toLowerCase().endsWith(domain));
-}
-
-function makeId(prefix) {
-    return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-}
-
-function seedDemoData() {
-    const users = getData("users", []);
-    if (!users.length) {
-        setData("users", [
-            {
-                id: "admin-user",
-                name: "Acity Admin",
-                email: "admin@acity.edu.gh",
-                password: "admin123",
-                roll: "ADMIN001",
-                role: "admin",
-                bio: "Platform moderator",
-                skillsOffered: "Moderation, campus support",
-                skillsNeeded: ""
-            },
-            {
-                id: "student-user",
-                name: "Test Student",
-                email: "student@acity.edu.gh",
-                password: "password123",
-                roll: "ACITY001",
-                role: "student",
-                bio: "Computer Science student",
-                skillsOffered: "Python tutoring",
-                skillsNeeded: "Public speaking"
-            }
-        ]);
-    }
-
-    const listings = getData("listings", []);
-    if (!listings.length) {
-        setData("listings", [
-            {
-                id: "listing-laptop",
-                title: "HP Laptop",
-                description: "Clean second-hand laptop for assignments and coding. Price: GHS 3,500.",
-                category: "Item",
-                type: "Offer",
-                status: "Available",
-                approval: "Approved",
-                flagged: false,
-                ownerEmail: "student@acity.edu.gh"
-            },
-            {
-                id: "listing-textbook",
-                title: "Engineering Mathematics Textbook",
-                description: "Lightly used textbook available for sale near the library. Price: GHS 120.",
-                category: "Item",
-                type: "Offer",
-                status: "Available",
-                approval: "Approved",
-                flagged: false,
-                ownerEmail: "student@acity.edu.gh"
-            },
-            {
-                id: "listing-tutoring",
-                title: "Python Tutoring",
-                description: "Offering beginner Python lessons for first-year students.",
-                category: "Skill",
-                type: "Offer",
-                status: "Available",
-                approval: "Approved",
-                flagged: false,
-                ownerEmail: "student@acity.edu.gh"
-            }
-        ]);
-    }
+    return loggedInUser;
 }
 
 function updateNavigation() {
-    const user = currentUser();
     document.querySelectorAll(".links").forEach(nav => {
-        if (user) {
-            const loginLink = nav.querySelector("a[href='login.html']");
-            if (loginLink) {
-                loginLink.textContent = user.role === "admin" ? "Admin Login" : "Logged In";
-            }
+        const loginLink = nav.querySelector("a[href='login.html']");
+        if (loginLink && loggedInUser) {
+            loginLink.textContent = loggedInUser.role === "admin" ? "Admin Login" : "Logged In";
         }
     });
 }
@@ -117,37 +56,29 @@ function setupRegistration() {
     const registerForm = document.getElementById("registerForm");
     if (!registerForm) return;
 
-    registerForm.addEventListener("submit", event => {
+    registerForm.addEventListener("submit", async event => {
         event.preventDefault();
 
         const user = {
-            id: makeId("user"),
             name: registerForm.elements.name.value.trim(),
             email: registerForm.elements.email.value.trim().toLowerCase(),
             roll: registerForm.elements.roll.value.trim(),
             password: registerForm.elements.password.value,
-            role: "student",
-            bio: "",
             skillsOffered: registerForm.elements.skillsOffered.value.trim(),
             skillsNeeded: registerForm.elements.skillsNeeded.value.trim()
         };
 
-        if (!isInstitutionalEmail(user.email)) {
-            alert("Registration is restricted to valid Academic City email addresses.");
-            return;
+        try {
+            const data = await apiRequest("/api/register", {
+                method: "POST",
+                body: JSON.stringify(user)
+            });
+            loggedInUser = data.user;
+            alert("Registration successful. Your profile has been created.");
+            window.location.href = "profile.html";
+        } catch (error) {
+            alert(error.message);
         }
-
-        const users = getData("users", []);
-        if (users.some(existingUser => existingUser.email === user.email)) {
-            alert("This email is already registered. Please login instead.");
-            return;
-        }
-
-        users.push(user);
-        setData("users", users);
-        localStorage.setItem("currentUser", JSON.stringify(user));
-        alert("Registration successful. Your profile has been created.");
-        window.location.href = "profile.html";
     });
 }
 
@@ -155,21 +86,23 @@ function setupLogin() {
     const loginForm = document.getElementById("loginForm");
     if (!loginForm) return;
 
-    loginForm.addEventListener("submit", event => {
+    loginForm.addEventListener("submit", async event => {
         event.preventDefault();
 
-        const email = loginForm.elements.email.value.trim().toLowerCase();
-        const password = loginForm.elements.password.value;
-        const user = getData("users", []).find(savedUser => savedUser.email === email && savedUser.password === password);
-
-        if (!user) {
-            alert("Invalid login details.");
-            return;
+        try {
+            const data = await apiRequest("/api/login", {
+                method: "POST",
+                body: JSON.stringify({
+                    email: loginForm.elements.email.value.trim().toLowerCase(),
+                    password: loginForm.elements.password.value
+                })
+            });
+            loggedInUser = data.user;
+            alert("Login successful.");
+            window.location.href = loggedInUser.role === "admin" ? "admin.html" : "marketplace.html";
+        } catch (error) {
+            alert(error.message);
         }
-
-        localStorage.setItem("currentUser", JSON.stringify(user));
-        alert("Login successful.");
-        window.location.href = user.role === "admin" ? "admin.html" : "marketplace.html";
     });
 }
 
@@ -177,34 +110,31 @@ function setupListingForm() {
     const listingForm = document.getElementById("listingForm");
     if (!listingForm) return;
 
-    listingForm.addEventListener("submit", event => {
+    listingForm.addEventListener("submit", async event => {
         event.preventDefault();
-        const user = currentUser();
 
-        if (!user) {
+        if (!currentUser()) {
             alert("Please login before creating a listing.");
             window.location.href = "login.html";
             return;
         }
 
-        const listing = {
-            id: makeId("listing"),
-            title: listingForm.elements.title.value.trim(),
-            description: listingForm.elements.description.value.trim(),
-            category: listingForm.elements.category.value,
-            type: listingForm.elements.type.value,
-            status: listingForm.elements.status.value,
-            approval: user.role === "admin" ? "Approved" : "Pending",
-            flagged: false,
-            ownerEmail: user.email
-        };
-
-        const listings = getData("listings", []);
-        listings.push(listing);
-        setData("listings", listings);
-
-        alert("Listing created. It will appear after admin approval.");
-        window.location.href = "marketplace.html";
+        try {
+            await apiRequest("/api/listings", {
+                method: "POST",
+                body: JSON.stringify({
+                    title: listingForm.elements.title.value.trim(),
+                    description: listingForm.elements.description.value.trim(),
+                    category: listingForm.elements.category.value,
+                    type: listingForm.elements.type.value,
+                    status: listingForm.elements.status.value
+                })
+            });
+            alert("Listing created. It will appear after admin approval.");
+            window.location.href = "marketplace.html";
+        } catch (error) {
+            alert(error.message);
+        }
     });
 }
 
@@ -213,22 +143,26 @@ function setupListings() {
     const skillContainer = document.getElementById("skillListings");
     if (!marketplaceContainer && !skillContainer) return;
 
-    const render = () => {
+    const render = async () => {
         const container = marketplaceContainer || skillContainer;
         const search = document.getElementById("search")?.value.toLowerCase() || "";
         const category = document.getElementById("categoryFilter")?.value || (skillContainer ? "Skill" : "All");
         const status = document.getElementById("statusFilter")?.value || "All";
-        const listings = getData("listings", []).filter(listing => listing.approval === "Approved" && !listing.flagged);
 
-        const filtered = listings.filter(listing => {
-            const matchesSearch = `${listing.title} ${listing.description} ${listing.category}`.toLowerCase().includes(search);
-            const matchesCategory = category === "All" || listing.category === category;
-            const matchesStatus = status === "All" || listing.status === status;
-            return matchesSearch && matchesCategory && matchesStatus;
-        });
+        try {
+            const data = await apiRequest("/api/listings");
+            const filtered = data.listings.filter(listing => {
+                const matchesSearch = `${listing.title} ${listing.description} ${listing.category}`.toLowerCase().includes(search);
+                const matchesCategory = category === "All" || listing.category === category;
+                const matchesStatus = status === "All" || listing.status === status;
+                return matchesSearch && matchesCategory && matchesStatus;
+            });
 
-        container.innerHTML = filtered.length ? "" : "<p>No listings match your search.</p>";
-        filtered.forEach(listing => container.appendChild(listingCard(listing)));
+            container.innerHTML = filtered.length ? "" : "<p>No listings match your search.</p>";
+            filtered.forEach(listing => container.appendChild(listingCard(listing)));
+        } catch (error) {
+            container.innerHTML = `<p>${error.message}</p>`;
+        }
     };
 
     ["search", "categoryFilter", "statusFilter"].forEach(id => {
@@ -255,30 +189,22 @@ function listingCard(listing) {
     return div;
 }
 
-function expressInterest(listingId) {
-    const user = currentUser();
-    if (!user) {
+async function expressInterest(listingId) {
+    if (!currentUser()) {
         alert("Please login before expressing interest.");
         window.location.href = "login.html";
         return;
     }
 
-    const listings = getData("listings", []);
-    const listing = listings.find(item => item.id === listingId);
-    if (!listing) return;
-
-    const interactions = getData("interactions", []);
-    interactions.push({
-        id: makeId("request"),
-        listingId,
-        listingTitle: listing.title,
-        requesterEmail: user.email,
-        ownerEmail: listing.ownerEmail,
-        message: `${user.name} is interested in ${listing.title}.`,
-        status: "Pending"
-    });
-    setData("interactions", interactions);
-    alert("Interest sent. Track the request on the Requests page.");
+    try {
+        await apiRequest("/api/interactions", {
+            method: "POST",
+            body: JSON.stringify({ listingId })
+        });
+        alert("Interest sent. Track the request on the Requests page.");
+    } catch (error) {
+        alert(error.message);
+    }
 }
 
 function setupProfile() {
@@ -299,131 +225,139 @@ function setupProfile() {
     profileForm.elements.skillsOffered.value = user.skillsOffered || "";
     profileForm.elements.skillsNeeded.value = user.skillsNeeded || "";
 
-    profileForm.addEventListener("submit", event => {
+    profileForm.addEventListener("submit", async event => {
         event.preventDefault();
-        const users = getData("users", []);
-        const updatedUser = {
-            ...user,
-            name: profileForm.elements.name.value.trim(),
-            roll: profileForm.elements.roll.value.trim(),
-            bio: profileForm.elements.bio.value.trim(),
-            skillsOffered: profileForm.elements.skillsOffered.value.trim(),
-            skillsNeeded: profileForm.elements.skillsNeeded.value.trim()
-        };
 
-        setData("users", users.map(savedUser => savedUser.id === user.id ? updatedUser : savedUser));
-        localStorage.setItem("currentUser", JSON.stringify(updatedUser));
-        alert("Profile updated.");
+        try {
+            const data = await apiRequest("/api/profile", {
+                method: "PATCH",
+                body: JSON.stringify({
+                    name: profileForm.elements.name.value.trim(),
+                    roll: profileForm.elements.roll.value.trim(),
+                    bio: profileForm.elements.bio.value.trim(),
+                    skillsOffered: profileForm.elements.skillsOffered.value.trim(),
+                    skillsNeeded: profileForm.elements.skillsNeeded.value.trim()
+                })
+            });
+            loggedInUser = data.user;
+            alert("Profile updated.");
+        } catch (error) {
+            alert(error.message);
+        }
     });
 
-    document.getElementById("logoutButton").addEventListener("click", () => {
-        localStorage.removeItem("currentUser");
+    document.getElementById("logoutButton").addEventListener("click", async () => {
+        await apiRequest("/api/logout", { method: "POST" });
+        loggedInUser = null;
         alert("You have logged out.");
         window.location.href = "index.html";
     });
 }
 
-function setupInteractions() {
+async function setupInteractions() {
     const list = document.getElementById("interactionList");
     if (!list) return;
 
-    const user = currentUser();
-    if (!user) {
+    if (!currentUser()) {
         list.innerHTML = "<p>Please login to track your trade requests.</p>";
         return;
     }
 
-    const interactions = getData("interactions", []).filter(interaction => {
-        return user.role === "admin" || interaction.requesterEmail === user.email || interaction.ownerEmail === user.email;
-    });
+    try {
+        const data = await apiRequest("/api/interactions");
+        list.innerHTML = data.interactions.length ? "" : "<p>No requests yet.</p>";
+        data.interactions.forEach(interaction => {
+            const card = document.createElement("div");
+            card.className = "card compact-card";
+            card.innerHTML = `
+                <h3>${interaction.listingTitle}</h3>
+                <p>${interaction.message}</p>
+                <p><strong>From:</strong> ${interaction.requesterEmail}</p>
+                <p><strong>To:</strong> ${interaction.ownerEmail}</p>
+                <p><strong>Status:</strong> ${interaction.status}</p>
+            `;
 
-    list.innerHTML = interactions.length ? "" : "<p>No requests yet.</p>";
-    interactions.forEach(interaction => {
-        const card = document.createElement("div");
-        card.className = "card compact-card";
-        card.innerHTML = `
-            <h3>${interaction.listingTitle}</h3>
-            <p>${interaction.message}</p>
-            <p><strong>From:</strong> ${interaction.requesterEmail}</p>
-            <p><strong>To:</strong> ${interaction.ownerEmail}</p>
-            <p><strong>Status:</strong> ${interaction.status}</p>
-        `;
+            if (interaction.ownerEmail === currentUser().email || currentUser().role === "admin") {
+                const approveButton = document.createElement("button");
+                approveButton.textContent = "Accept";
+                approveButton.addEventListener("click", () => updateInteraction(interaction.id, "Accepted"));
+                card.appendChild(approveButton);
 
-        if (interaction.ownerEmail === user.email || user.role === "admin") {
-            const approveButton = document.createElement("button");
-            approveButton.textContent = "Accept";
-            approveButton.addEventListener("click", () => updateInteraction(interaction.id, "Accepted"));
-            card.appendChild(approveButton);
+                const rejectButton = document.createElement("button");
+                rejectButton.textContent = "Reject";
+                rejectButton.addEventListener("click", () => updateInteraction(interaction.id, "Rejected"));
+                card.appendChild(rejectButton);
+            }
 
-            const rejectButton = document.createElement("button");
-            rejectButton.textContent = "Reject";
-            rejectButton.addEventListener("click", () => updateInteraction(interaction.id, "Rejected"));
-            card.appendChild(rejectButton);
-        }
-
-        list.appendChild(card);
-    });
+            list.appendChild(card);
+        });
+    } catch (error) {
+        list.innerHTML = `<p>${error.message}</p>`;
+    }
 }
 
-function updateInteraction(id, status) {
-    const interactions = getData("interactions", []).map(interaction => {
-        return interaction.id === id ? { ...interaction, status } : interaction;
+async function updateInteraction(id, status) {
+    await apiRequest(`/api/interactions/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ status })
     });
-    setData("interactions", interactions);
     window.location.reload();
 }
 
-function setupAdmin() {
+async function setupAdmin() {
     const adminListings = document.getElementById("adminListings");
     if (!adminListings) return;
 
-    const user = currentUser();
     const notice = document.getElementById("adminNotice");
-    if (!user || user.role !== "admin") {
+    if (!currentUser() || currentUser().role !== "admin") {
         notice.textContent = "Admin access only. Login with admin@acity.edu.gh / admin123.";
         adminListings.innerHTML = "";
         return;
     }
 
-    const listings = getData("listings", []);
-    const interactions = getData("interactions", []);
-    document.getElementById("activityStats").innerHTML = `
-        <div><strong>${listings.length}</strong><span>Listings</span></div>
-        <div><strong>${interactions.length}</strong><span>Interactions</span></div>
-        <div><strong>${listings.filter(item => item.approval === "Pending").length}</strong><span>Pending</span></div>
-        <div><strong>${listings.filter(item => item.flagged).length}</strong><span>Flagged</span></div>
-    `;
-
-    adminListings.innerHTML = listings.length ? "" : "<p>No listings to moderate.</p>";
-    listings.forEach(listing => {
-        const card = document.createElement("div");
-        card.className = "card compact-card";
-        card.innerHTML = `
-            <span class="badge">${listing.approval}${listing.flagged ? " | Flagged" : ""}</span>
-            <h3>${listing.title}</h3>
-            <p>${listing.description}</p>
-            <p><strong>Category:</strong> ${listing.category}</p>
-            <p><strong>Status:</strong> ${listing.status}</p>
-            <p><strong>Owner:</strong> ${listing.ownerEmail}</p>
-            <button data-action="approve">Approve</button>
-            <button data-action="edit">Edit</button>
-            <button data-action="flag">Flag</button>
-            <button data-action="delete">Delete</button>
+    try {
+        const stats = await apiRequest("/api/admin/stats");
+        document.getElementById("activityStats").innerHTML = `
+            <div><strong>${stats.listings}</strong><span>Listings</span></div>
+            <div><strong>${stats.interactions}</strong><span>Interactions</span></div>
+            <div><strong>${stats.pending}</strong><span>Pending</span></div>
+            <div><strong>${stats.flagged}</strong><span>Flagged</span></div>
         `;
 
-        card.querySelector("[data-action='approve']").addEventListener("click", () => updateListing(listing.id, { approval: "Approved", flagged: false }));
-        card.querySelector("[data-action='edit']").addEventListener("click", () => editListing(listing));
-        card.querySelector("[data-action='flag']").addEventListener("click", () => updateListing(listing.id, { flagged: true }));
-        card.querySelector("[data-action='delete']").addEventListener("click", () => deleteListing(listing.id));
-        adminListings.appendChild(card);
-    });
+        const data = await apiRequest("/api/admin/listings");
+        adminListings.innerHTML = data.listings.length ? "" : "<p>No listings to moderate.</p>";
+        data.listings.forEach(listing => {
+            const card = document.createElement("div");
+            card.className = "card compact-card";
+            card.innerHTML = `
+                <span class="badge">${listing.approval}${listing.flagged ? " | Flagged" : ""}</span>
+                <h3>${listing.title}</h3>
+                <p>${listing.description}</p>
+                <p><strong>Category:</strong> ${listing.category}</p>
+                <p><strong>Status:</strong> ${listing.status}</p>
+                <p><strong>Owner:</strong> ${listing.ownerEmail}</p>
+                <button data-action="approve">Approve</button>
+                <button data-action="edit">Edit</button>
+                <button data-action="flag">Flag</button>
+                <button data-action="delete">Delete</button>
+            `;
+
+            card.querySelector("[data-action='approve']").addEventListener("click", () => updateListing(listing.id, { approval: "Approved", flagged: false }));
+            card.querySelector("[data-action='edit']").addEventListener("click", () => editListing(listing));
+            card.querySelector("[data-action='flag']").addEventListener("click", () => updateListing(listing.id, { flagged: true }));
+            card.querySelector("[data-action='delete']").addEventListener("click", () => deleteListing(listing.id));
+            adminListings.appendChild(card);
+        });
+    } catch (error) {
+        notice.textContent = error.message;
+    }
 }
 
-function updateListing(id, updates) {
-    const listings = getData("listings", []).map(listing => {
-        return listing.id === id ? { ...listing, ...updates } : listing;
+async function updateListing(id, updates) {
+    await apiRequest(`/api/admin/listings/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(updates)
     });
-    setData("listings", listings);
     window.location.reload();
 }
 
@@ -435,8 +369,8 @@ function editListing(listing) {
     updateListing(listing.id, { title: title.trim(), description: description.trim() });
 }
 
-function deleteListing(id) {
+async function deleteListing(id) {
     if (!confirm("Delete this listing?")) return;
-    setData("listings", getData("listings", []).filter(listing => listing.id !== id));
+    await apiRequest(`/api/admin/listings/${id}`, { method: "DELETE" });
     window.location.reload();
 }
