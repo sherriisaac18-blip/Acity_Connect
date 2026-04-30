@@ -1,0 +1,178 @@
+body{
+    margin: 0;
+    font-family: 'Helvetica Neue', sans-serif;
+    background-color: white;
+    color: black;
+}
+
+nav{
+    background-color: white;
+    color: #CB3734;
+    padding: 15px;
+}
+
+.logo{
+    font-weight: bold;
+    font-size: 20px;
+    display: inline-block;
+    margin-left: 30px;
+}
+
+.links{
+    float: right;
+    margin-right: 70px;
+}
+
+.links a{
+    color: #CB3734;
+    text-decoration: none;
+    padding: 15px;
+}
+
+.hero{
+    background-color: #CB3734;
+    /* background-image: url('Pink\ and\ Cream\ Modern\ Tailoring\ Instagram\ Post.png');
+    background-size: cover;
+    background-position: center; */
+    padding: 100px 20px;
+    color: white;
+    text-align: center;
+}
+.hero h1{
+    font-size: 35px;
+    margin-bottom: 10px;
+}
+
+.button{
+    color: #CB3734;
+    font-weight: bold;
+    font-size: 15px;
+    background-color: white;
+    border: none;
+    padding: 8px 30px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.services{
+    text-align: center;
+    padding: 20px 10px;
+    color: black;
+    margin-bottom: 70px;
+}
+
+.services h2{
+    margin-bottom: 10px;
+    font-size: 30px;
+    color: black;
+}
+
+.services hr{
+    margin-bottom: 30px;
+    width: 83%;
+    background-color: black;
+    height: 0.5px;
+    border: none;
+}
+
+.services h3{
+    font-size: 25px;
+    margin-bottom: 5px;
+}
+
+.price{
+    color: #CB3734;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.card{
+    padding: 5px 30px;
+    padding-bottom: 30px;
+    padding-top: 20px;
+    margin: 8px;
+    width: 350px;
+    height: 400px;
+    vertical-align: middle;
+    display: inline-block;
+    border-radius: 5px;
+    background-color: white;
+    border: 1px solid #CB3734;
+
+}
+
+.card button{
+    font-size: 15px;
+    background-color: #CB3734;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 18px;
+    color: white;
+    cursor: pointer;
+    margin-top: 5px;
+    font-weight: bold;
+}
+
+footer{
+    background-color: #CB3734;
+    padding: 40px;
+    color: white;
+    text-align: center;
+    width: 100%;
+    font-size: 12px;
+}
+
+footer a{
+    color: white;
+    text-decoration: none;
+}
+
+footer p{
+    display: inline;
+}
+
+.copyright{
+    display: inline-block;
+}
+
+.socials{
+    display: inline-block;
+}
+
+.v-line{
+    height: 10px;
+    width: 1px;
+    background-color: white;
+    border: none;
+    display: inline-block;
+    margin-left: 3px;
+    margin-right: 3px;
+}
+
+.description {
+    text-align: left;
+}
+.description h3{
+    font-size: 40px;
+    margin-bottom: 10px;
+}
+
+.register{
+    padding: 20px;
+}
+.go-back{
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.register-button{
+    color: white;
+    font-weight: bold;
+    font-size: 15px;
+    background-color: #CB3734;
+    border: none;
+    padding: 8px 30px;
+    border-radius: 6px;
+    cursor: pointer;
+}
