@@ -6,9 +6,9 @@ Acity Connect is a smart campus marketplace and skill exchange platform for Acad
 The app now uses a Node.js backend API instead of browser localStorage. The backend serves the frontend pages and stores users, listings, and requests in `data.json` on the server.
 
 ## Deployment Links
-Frontend and Backend on Render: Add your Render Web Service link here after deployment.
+Frontend and Backend on Render: https://acity-connect-hxh3.onrender.com
 
-GitHub Repository: Add your public GitHub repository link here.
+GitHub Repository: https://github.com/sherriisaac18-blip/Acity_Connect
 
 ## Login Details
 Admin Account: admin@acity.edu.gh | Password: admin123
