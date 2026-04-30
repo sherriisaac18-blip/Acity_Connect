@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Marketplace | Acity Connect</title>
+    <title>Requests | Acity Connect</title>
     <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
     <nav>
         <div class="logo">AcityConnect</div>
@@ -23,34 +22,9 @@
     </nav>
 
     <section class="services">
-        <h2>Marketplace</h2>
-        <a href="create.html">
-            <button class="register-button">+ Create Listing</button>
-        </a>
+        <h2>Trade Requests</h2>
         <hr>
-
-        <div class="filters">
-            <input type="text" id="search" placeholder="Search listings...">
-            <select id="categoryFilter">
-                <option value="All">All Categories</option>
-                <option value="Item">Items</option>
-                <option value="Skill">Skills</option>
-            </select>
-            <select id="statusFilter">
-                <option value="All">All Statuses</option>
-                <option value="Available">Available</option>
-                <option value="Sold">Sold</option>
-                <option value="Swapped">Swapped</option>
-            </select>
-        </div>
-
-        <div id="listings"></div>
-    </section>
-
-    <section class="go-back">
-        <a href="interactions.html">
-            <button class="register-button">Track Requests</button>
-        </a>
+        <div id="interactionList"></div>
     </section>
 
     <footer>

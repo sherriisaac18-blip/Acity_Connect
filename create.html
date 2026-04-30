@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Listing</title>
+    <title>Create Listing | Acity Connect</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -13,31 +13,68 @@
             <a href="index.html">Home</a>
             <a href="marketplace.html">Marketplace</a>
             <a href="skills.html">Skills</a>
-            <a href="login.html">Login</a>
             <a href="create.html">Create Listing</a>
+            <a href="profile.html">Profile</a>
+            <a href="interactions.html">Requests</a>
+            <a href="admin.html">Admin</a>
+            <a href="login.html">Login</a>
         </div>
     </nav>
-<body>
 
-<h2>Create Listing</h2>
+    <section class="register">
+        <form id="listingForm" class="panel narrow">
+            <h1>Create Listing</h1>
+            <p class="muted">Post an item for sale or offer/request a skill. New posts wait for admin approval.</p>
 
-<form id="listingForm">
-    <input type="text" placeholder="Title"><br><br>
-    <input type="text" placeholder="Description"><br><br>
+            <label for="listingTitle">Title</label>
+            <input id="listingTitle" type="text" name="title" placeholder="Calculus textbook or Python tutoring" required>
 
-    <select>
-        <option>Item</option>
-        <option>Skill</option>
-    </select><br><br>
+            <label for="listingDescription">Description</label>
+            <textarea id="listingDescription" name="description" placeholder="Add price, location, time, or exchange details" required></textarea>
 
-    <select>
-        <option>Available</option>
-        <option>Sold</option>
-        <option>Swapped</option>
-    </select><br><br>
+            <label for="listingCategory">Category</label>
+            <select id="listingCategory" name="category">
+                <option>Item</option>
+                <option>Skill</option>
+            </select>
 
-    <button>Create</button>
-</form>
+            <label for="listingType">Listing Type</label>
+            <select id="listingType" name="type">
+                <option>Offer</option>
+                <option>Request</option>
+            </select>
+
+            <label for="listingStatus">Status</label>
+            <select id="listingStatus" name="status">
+                <option>Available</option>
+                <option>Sold</option>
+                <option>Swapped</option>
+            </select>
+
+            <button class="register-button" type="submit">Create</button>
+        </form>
+    </section>
+
+    <section class="go-back">
+        <a href="marketplace.html">
+            <button class="register-button">View Marketplace</button>
+        </a>
+    </section>
+
+    <footer>
+        <div class="copyright">
+            &#169; 2026 AcityConnect.
+        </div>
+        <div class="v-line"></div>
+        <div class="socials">
+            <p>Follow us: </p>
+            <a href="#">Facebook</a>
+            <div class="v-line"></div>
+            <a href="#">Twitter</a>
+            <div class="v-line"></div>
+            <a href="#">LinkedIn</a>
+        </div>
+    </footer>
 
 <script src="script.js"></script>
 </body>

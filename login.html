@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign up Form</title>
+    <title>Login | Acity Connect</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -13,39 +13,65 @@
             <a href="index.html">Home</a>
             <a href="marketplace.html">Marketplace</a>
             <a href="skills.html">Skills</a>
-            <a href="login.html">Login</a>
             <a href="create.html">Create Listing</a>
+            <a href="profile.html">Profile</a>
+            <a href="interactions.html">Requests</a>
+            <a href="admin.html">Admin</a>
+            <a href="login.html">Login</a>
         </div>
     </nav>
 
-    <Section class="register">
-    <h1>Registration</h1>
+    <section class="register">
+        <div class="form-grid">
+            <form id="registerForm" class="panel">
+                <h1>Registration</h1>
+                <p class="muted">Use an Academic City email address to join the marketplace.</p>
 
-        <form id="registerForm"> 
-            
-            <label for="Name">Full Name</label> <br>
-            <input type="text" name = "name"> <br><br>
+                <label for="registerName">Full Name</label>
+                <input id="registerName" type="text" name="name" required>
 
-            <label for="">Email</label> <br>
-            <input type="text"> <br><br>
+                <label for="registerEmail">ACity Email</label>
+                <input id="registerEmail" type="email" name="email" placeholder="student@acity.edu.gh" required>
 
-            <label for="">Roll Number</label> <br>
-            <input type="text"> <br><br>
+                <label for="registerRoll">Roll Number</label>
+                <input id="registerRoll" type="text" name="roll" required>
 
-            <button class="register-button">Register</button>
-        </form>
+                <label for="registerPassword">Password</label>
+                <input id="registerPassword" type="password" name="password" minlength="6" required>
 
-    </Section>
+                <label for="registerSkillsOffered">Skills Offered</label>
+                <textarea id="registerSkillsOffered" name="skillsOffered" placeholder="Tutoring, coding, design"></textarea>
+
+                <label for="registerSkillsNeeded">Skills Needed</label>
+                <textarea id="registerSkillsNeeded" name="skillsNeeded" placeholder="Photography, public speaking"></textarea>
+
+                <button class="register-button" type="submit">Register</button>
+            </form>
+
+            <form id="loginForm" class="panel">
+                <h1>Login</h1>
+                <p class="muted">Demo users: admin@acity.edu.gh / admin123 or student@acity.edu.gh / password123</p>
+
+                <label for="loginEmail">Email</label>
+                <input id="loginEmail" type="email" name="email" required>
+
+                <label for="loginPassword">Password</label>
+                <input id="loginPassword" type="password" name="password" required>
+
+                <button class="register-button" type="submit">Login</button>
+            </form>
+        </div>
+    </section>
 
     <section class="go-back">
-    <a href="index.html">
-        <button class="register-button">Return Home</button>
-    </a>
+        <a href="index.html">
+            <button class="register-button">Return Home</button>
+        </a>
     </section>
 
     <footer>
         <div class="copyright">
-            &#169; 2026 AcityConnect. 
+            &#169; 2026 AcityConnect.
         </div>
         <div class="v-line"></div>
         <div class="socials">
